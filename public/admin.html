@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Panel de Administrador - Creatímetro Digital</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>📊 Panel de Administrador</h1>
+            <p>Creatímetro Digital - Análisis de Creatividad</p>
+        </header>
+
+        <!-- Estadísticas Generales -->
+        <section class="stats-section">
+            <h2>📈 Estadísticas Generales</h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="totalResponses">-</div>
+                    <div class="stat-label">Total Respuestas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💡</div>
+                    <div class="stat-value" id="avgFluency">-</div>
+                    <div class="stat-label">Fluidez Promedio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔀</div>
+                    <div class="stat-value" id="avgFlexibility">-</div>
+                    <div class="stat-label">Flexibilidad Promedio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value" id="avgCreativity">-</div>
+                    <div class="stat-label">Creatividad Promedio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">😊</div>
+                    <div class="stat-value" id="avgFun">-</div>
+                    <div class="stat-label">Diversión Promedio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-value" id="avgTime">-</div>
+                    <div class="stat-label">Tiempo Promedio</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controles de Exportación -->
+        <section class="export-section">
+            <h2>📁 Exportar Datos</h2>
+            <div class="export-buttons">
+                <button id="exportCsv" class="export-btn">
+                    📊 Exportar CSV
+                </button>
+                <button id="exportJson" class="export-btn">
+                    📄 Exportar JSON
+                </button>
+                <button id="refreshData" class="refresh-btn">
+                    🔄 Actualizar Datos
+                </button>
+            </div>
+        </section>
+
+        <!-- Lista de Respuestas -->
+        <section class="responses-section">
+            <h2>📝 Respuestas de Estudiantes</h2>
+            <div id="responsesList" class="responses-list">
+                <!-- Las respuestas se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Mensaje de estado -->
+        <div id="adminMessage" class="admin-message" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Variables globales
+        let allResponses = [];
+
+        // Elementos del DOM
+        const statsGrid = document.getElementById('statsGrid');
+        const responsesList = document.getElementById('responsesList');
+        const adminMessage = document.getElementById('adminMessage');
+        const exportCsvBtn = document.getElementById('exportCsv');
+        const exportJsonBtn = document.getElementById('exportJson');
+        const refreshDataBtn = document.getElementById('refreshData');
+
+        // Función para cargar estadísticas
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const result = await response.json();
+
+                if (result.success) {
+                    const stats = result.data;
+                    
+                    document.getElementById('totalResponses').textContent = stats.totalRespuestas;
+                    document.getElementById('avgFluency').textContent = stats.promedioFluidez.toFixed(1);
+                    document.getElementById('avgFlexibility').textContent = stats.promedioFlexibilidad.toFixed(1);
+                    document.getElementById('avgCreativity').textContent = stats.promedioPuntaje.toFixed(1);
+                    document.getElementById('avgFun').textContent = stats.promedioDiversion.toFixed(1);
+                    document.getElementById('avgTime').textContent = formatTime(stats.promedioTiempo);
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+                showAdminMessage('❌ Error cargando estadísticas', 'error');
+            }
+        }
+
+        // Función para cargar respuestas
+        async function loadResponses() {
+            try {
+                const response = await fetch('/api/responses');
+                const result = await response.json();
+
+                if (result.success) {
+                    allResponses = result.data;
+                    renderResponses();
+                }
+            } catch (error) {
+                console.error('Error cargando respuestas:', error);
+                showAdminMessage('❌ Error cargando respuestas', 'error');
+            }
+        }
+
+        // Función para renderizar respuestas
+        function renderResponses() {
+            if (allResponses.length === 0) {
+                responsesList.innerHTML = '<div class="no-responses">📭 No hay respuestas aún.</div>';
+                return;
+            }
+
+            responsesList.innerHTML = allResponses.map(response => {
+                const ideasCount = response.ideas.filter(idea => idea && idea.trim().length > 0).length;
+                const formattedDate = new Date(response.timestamp).toLocaleString('es-ES');
+                
+                return `
+                    <div class="response-card" data-id="${response.id}">
+                        <div class="response-header">
+                            <h3>👤 ${response.nombre}</h3>
+                            <div class="response-actions">
+                                <button class="delete-btn" onclick="deleteResponse('${response.id}')">🗑️</button>
+                            </div>
+                        </div>
+                        
+                        <div class="response-info">
+                            <div class="info-item">
+                                <strong>📧 Correo:</strong> ${response.correo}
+                            </div>
+                            <div class="info-item">
+                                <strong>📅 Fecha:</strong> ${formattedDate}
+                            </div>
+                            <div class="info-item">
+                                <strong>⏱️ Tiempo utilizado:</strong> ${formatTime(response.tiempoUtilizado)}
+                            </div>
+                        </div>
+
+                        <div class="metrics-grid">
+                            <div class="metric">
+                                <div class="metric-value">${response.metricas.fluidez}/10</div>
+                                <div class="metric-label">💡 Fluidez</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${response.metricas.flexibilidad}</div>
+                                <div class="metric-label">🔀 Flexibilidad</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${response.metricas.puntajeCreatividad}/100</div>
+                                <div class="metric-label">🎯 Creatividad</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${response.diversion}/5</div>
+                                <div class="metric-label">😊 Diversión</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${response.desafio}/5</div>
+                                <div class="metric-label">🧩 Desafío</div>
+                            </div>
+                        </div>
+
+                        <div class="ideas-section">
+                            <h4>💡 Ideas generadas (${ideasCount}/10):</h4>
+                            <div class="ideas-list">
+                                ${response.ideas.map((idea, index) => 
+                                    idea && idea.trim() ? 
+                                    `<div class="idea-item"><strong>${index + 1}.</strong> ${idea}</div>` : 
+                                    `<div class="idea-item empty"><strong>${index + 1}.</strong> <em>Sin respuesta</em></div>`
+                                ).join('')}
+                            </div>
+                        </div>
+
+                        <div class="feedback-section">
+                            <div class="feedback-item">
+                                <strong>🔄 Más actividades:</strong> ${response.masActividades || 'No especificado'}
+                            </div>
+                            ${response.comentarios ? `
+                                <div class="feedback-item">
+                                    <strong>✍️ Comentarios:</strong> ${response.comentarios}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="grading-section">
+                            <label for="grade-${response.id}">📝 Calificación manual (0-100):</label>
+                            <div class="grade-input-group">
+                                <input 
+                                    type="number" 
+                                    id="grade-${response.id}" 
+                                    min="0" 
+                                    max="100" 
+                                    value="${response.calificacionManual || ''}"
+                                    placeholder="Calificación"
+                                >
+                                <button onclick="saveGrade('${response.id}')" class="save-grade-btn">
+                                    💾 Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Función para eliminar respuesta
+        async function deleteResponse(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar esta respuesta?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/responses/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAdminMessage('✅ Respuesta eliminada exitosamente', 'success');
+                    loadData(); // Recargar datos
+                } else {
+                    showAdminMessage(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error eliminando respuesta:', error);
+                showAdminMessage('❌ Error de conexión', 'error');
+            }
+        }
+
+        // Función para guardar calificación
+        async function saveGrade(id) {
+            const gradeInput = document.getElementById(`grade-${id}`);
+            const calificacion = parseInt(gradeInput.value);
+
+            if (isNaN(calificacion) || calificacion < 0 || calificacion > 100) {
+                showAdminMessage('❌ La calificación debe estar entre 0 y 100', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/responses/${id}/grade`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ calificacion })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAdminMessage('✅ Calificación guardada exitosamente', 'success');
+                } else {
+                    showAdminMessage(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error guardando calificación:', error);
+                showAdminMessage('❌ Error de conexión', 'error');
+            }
+        }
+
+        // Función para exportar a CSV
+        function exportToCSV() {
+            if (allResponses.length === 0) {
+                showAdminMessage('❌ No hay datos para exportar', 'error');
+                return;
+            }
+
+            const headers = [
+                'Nombre', 'Correo', 'Fecha', 'Tiempo (seg)', 'Fluidez', 'Flexibilidad', 
+                'Creatividad', 'Diversión', 'Desafío', 'Más Actividades', 'Comentarios',
+                'Calificación Manual', ...Array.from({length: 10}, (_, i) => `Idea ${i + 1}`)
+            ];
+
+            const csvData = allResponses.map(response => [
+                response.nombre,
+                response.correo,
+                new Date(response.timestamp).toLocaleString('es-ES'),
+                response.tiempoUtilizado,
+                response.metricas.fluidez,
+                response.metricas.flexibilidad,
+                response.metricas.puntajeCreatividad,
+                response.diversion,
+                response.desafio,
+                response.masActividades,
+                response.comentarios || '',
+                response.calificacionManual || '',
+                ...response.ideas
+            ]);
+
+            const csvContent = [headers, ...csvData]
+                .map(row => row.map(field => `"${field}"`).join(','))
+                .join('\n');
+
+            downloadFile(csvContent, 'creativimetro-datos.csv', 'text/csv');
+            showAdminMessage('✅ Archivo CSV descargado exitosamente', 'success');
+        }
+
+        // Función para exportar a JSON
+        function exportToJSON() {
+            if (allResponses.length === 0) {
+                showAdminMessage('❌ No hay datos para exportar', 'error');
+                return;
+            }
+
+            const jsonContent = JSON.stringify(allResponses, null, 2);
+            downloadFile(jsonContent, 'creativimetro-datos.json', 'application/json');
+            showAdminMessage('✅ Archivo JSON descargado exitosamente', 'success');
+        }
+
+        // Función para descargar archivo
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Función para formatear tiempo
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Función para mostrar mensajes de administrador
+        function showAdminMessage(message, type) {
+            adminMessage.innerHTML = message;
+            adminMessage.className = `admin-message ${type}`;
+            adminMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                adminMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Función para cargar todos los datos
+        async function loadData() {
+            await Promise.all([loadStats(), loadResponses()]);
+        }
+
+        // Event listeners
+        exportCsvBtn.addEventListener('click', exportToCSV);
+        exportJsonBtn.addEventListener('click', exportToJSON);
+        refreshDataBtn.addEventListener('click', loadData);
+
+        // Cargar datos al inicializar
+        loadData();
+
+        // Auto-refresh cada 30 segundos
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>

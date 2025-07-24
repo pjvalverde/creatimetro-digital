@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Creatímetro Digital - Viaje al Futuro</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 Viaje al Futuro – El Mundo en 50 Años</h1>
+            <p class="description">
+                🌟 Bienvenido al <strong>Creatímetro Digital</strong>. Vamos a medir y desarrollar tu creatividad 
+                imaginando cómo será la tecnología en 50 años. Tienes <strong>5 minutos</strong> para ser tan original como puedas.
+            </p>
+            <div class="challenge">
+                🧠💡 <strong>Tu reto:</strong> Imagina y escribe todas las ideas tecnológicas creativas e innovadoras 
+                que crees existirán en el año 2075. ¡Piensa sin límites!
+            </div>
+        </header>
+
+        <!-- Timer -->
+        <div class="timer-container">
+            <div class="timer" id="timer">
+                <div class="timer-circle">
+                    <div class="timer-text">
+                        <span id="minutes">05</span>:<span id="seconds">00</span>
+                    </div>
+                </div>
+            </div>
+            <p class="timer-label">⏰ Tiempo restante</p>
+        </div>
+
+        <form id="creativityForm" class="form">
+            <!-- Sección 1: Datos del estudiante -->
+            <section class="form-section">
+                <h2>📌 Sección 1: Datos rápidos sobre ti</h2>
+                <div class="input-group">
+                    <label for="nombre">👤 Nombre completo *</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="input-group">
+                    <label for="correo">📧 Correo institucional *</label>
+                    <input type="email" id="correo" name="correo" required>
+                </div>
+            </section>
+
+            <!-- Sección 2: Ideas tecnológicas -->
+            <section class="form-section">
+                <h2>📌 Sección 2: Tus ideas tecnológicas innovadoras</h2>
+                <div class="ideas-grid">
+                    <div class="input-group">
+                        <label for="idea1">🚀 Idea Innovadora #1:</label>
+                        <input type="text" id="idea1" name="idea1" placeholder="Escribe tu primera idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea2">🚀 Idea Innovadora #2:</label>
+                        <input type="text" id="idea2" name="idea2" placeholder="Escribe tu segunda idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea3">🚀 Idea Innovadora #3:</label>
+                        <input type="text" id="idea3" name="idea3" placeholder="Escribe tu tercera idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea4">🚀 Idea Innovadora #4:</label>
+                        <input type="text" id="idea4" name="idea4" placeholder="Escribe tu cuarta idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea5">🚀 Idea Innovadora #5:</label>
+                        <input type="text" id="idea5" name="idea5" placeholder="Escribe tu quinta idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea6">🚀 Idea Innovadora #6:</label>
+                        <input type="text" id="idea6" name="idea6" placeholder="Escribe tu sexta idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea7">🚀 Idea Innovadora #7:</label>
+                        <input type="text" id="idea7" name="idea7" placeholder="Escribe tu séptima idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea8">🚀 Idea Innovadora #8:</label>
+                        <input type="text" id="idea8" name="idea8" placeholder="Escribe tu octava idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea9">🚀 Idea Innovadora #9:</label>
+                        <input type="text" id="idea9" name="idea9" placeholder="Escribe tu novena idea tecnológica...">
+                    </div>
+                    <div class="input-group">
+                        <label for="idea10">🚀 Idea Innovadora #10:</label>
+                        <input type="text" id="idea10" name="idea10" placeholder="Escribe tu décima idea tecnológica...">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección 3: Experiencia -->
+            <section class="form-section">
+                <h2>📌 Sección 3: Cuéntanos sobre tu experiencia</h2>
+                
+                <div class="input-group">
+                    <label>🎉 ¿Qué tan divertida encontraste esta actividad?</label>
+                    <div class="scale-group">
+                        <input type="radio" id="diversion1" name="diversion" value="1">
+                        <label for="diversion1">1 - Aburrida</label>
+                        <input type="radio" id="diversion2" name="diversion" value="2">
+                        <label for="diversion2">2 - Poco divertida</label>
+                        <input type="radio" id="diversion3" name="diversion" value="3">
+                        <label for="diversion3">3 - Regular</label>
+                        <input type="radio" id="diversion4" name="diversion" value="4">
+                        <label for="diversion4">4 - Divertida</label>
+                        <input type="radio" id="diversion5" name="diversion" value="5">
+                        <label for="diversion5">5 - Muy divertida</label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>🧩 ¿Qué tan desafiante fue generar estas ideas?</label>
+                    <div class="scale-group">
+                        <input type="radio" id="desafio1" name="desafio" value="1">
+                        <label for="desafio1">1 - Muy fácil</label>
+                        <input type="radio" id="desafio2" name="desafio" value="2">
+                        <label for="desafio2">2 - Fácil</label>
+                        <input type="radio" id="desafio3" name="desafio" value="3">
+                        <label for="desafio3">3 - Regular</label>
+                        <input type="radio" id="desafio4" name="desafio" value="4">
+                        <label for="desafio4">4 - Desafiante</label>
+                        <input type="radio" id="desafio5" name="desafio" value="5">
+                        <label for="desafio5">5 - Muy desafiante</label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>🔄 ¿Te gustaría participar en más actividades creativas como esta en tus clases?</label>
+                    <div class="radio-group">
+                        <input type="radio" id="masActividadesSi" name="masActividades" value="si">
+                        <label for="masActividadesSi">Sí</label>
+                        <input type="radio" id="masActividadesNo" name="masActividades" value="no">
+                        <label for="masActividadesNo">No</label>
+                        <input type="radio" id="masActividadesQuizas" name="masActividades" value="quizas">
+                        <label for="masActividadesQuizas">Quizás</label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="comentarios">✍️ Comentarios o sugerencias para futuras actividades</label>
+                    <textarea id="comentarios" name="comentarios" rows="4" placeholder="Comparte tus comentarios o sugerencias (opcional)..."></textarea>
+                </div>
+            </section>
+
+            <div class="submit-section">
+                <button type="submit" id="submitBtn" class="submit-btn">
+                    🚀 Enviar mis ideas creativas
+                </button>
+            </div>
+        </form>
+
+        <!-- Mensaje de resultado -->
+        <div id="resultMessage" class="result-message" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Variables globales
+        let timeLeft = 300; // 5 minutos en segundos
+        let timerInterval;
+        let timerStarted = false;
+        let startTime;
+
+        // Elementos del DOM
+        const timerElement = document.getElementById('timer');
+        const minutesElement = document.getElementById('minutes');
+        const secondsElement = document.getElementById('seconds');
+        const form = document.getElementById('creativityForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultMessage = document.getElementById('resultMessage');
+
+        // Función para iniciar el timer
+        function startTimer() {
+            if (timerStarted) return;
+            
+            timerStarted = true;
+            startTime = Date.now();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                // Cambiar color cuando queden 60 segundos
+                if (timeLeft <= 60) {
+                    timerElement.classList.add('warning');
+                }
+                
+                // Tiempo agotado
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.classList.add('expired');
+                    alert('⏰ ¡Tiempo agotado! El formulario se enviará automáticamente.');
+                    submitForm();
+                }
+            }, 1000);
+        }
+
+        // Función para actualizar la visualización del timer
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            minutesElement.textContent = minutes.toString().padStart(2, '0');
+            secondsElement.textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // Iniciar timer cuando el usuario comience a escribir
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', startTimer, { once: true });
+        });
+
+        // Función para enviar el formulario
+        async function submitForm() {
+            try {
+                // Recopilar datos del formulario
+                const formData = new FormData(form);
+                const data = {
+                    nombre: formData.get('nombre'),
+                    correo: formData.get('correo'),
+                    ideas: [
+                        formData.get('idea1') || '',
+                        formData.get('idea2') || '',
+                        formData.get('idea3') || '',
+                        formData.get('idea4') || '',
+                        formData.get('idea5') || '',
+                        formData.get('idea6') || '',
+                        formData.get('idea7') || '',
+                        formData.get('idea8') || '',
+                        formData.get('idea9') || '',
+                        formData.get('idea10') || ''
+                    ],
+                    diversion: formData.get('diversion'),
+                    desafio: formData.get('desafio'),
+                    masActividades: formData.get('masActividades'),
+                    comentarios: formData.get('comentarios') || '',
+                    tiempoUtilizado: startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
+                };
+
+                // Validar datos requeridos
+                if (!data.nombre || !data.correo) {
+                    showMessage('❌ Por favor, completa tu nombre y correo.', 'error');
+                    return;
+                }
+
+                // Deshabilitar botón de envío
+                submitBtn.disabled = true;
+                submitBtn.textContent = '📤 Enviando...';
+
+                // Enviar datos al servidor
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(`✅ ¡Gracias ${data.nombre}! Tus ideas han sido enviadas exitosamente. 
+                               Métricas calculadas: Fluidez: ${result.metricas.fluidez}/10, 
+                               Flexibilidad: ${result.metricas.flexibilidad}, 
+                               Puntaje de Creatividad: ${result.metricas.puntajeCreatividad}/100`, 'success');
+                    
+                    // Limpiar formulario
+                    form.reset();
+                    
+                    // Detener timer
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                    }
+                } else {
+                    showMessage(`❌ Error: ${result.message}`, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '🚀 Enviar mis ideas creativas';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('❌ Error de conexión. Por favor, intenta nuevamente.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Enviar mis ideas creativas';
+            }
+        }
+
+        // Función para mostrar mensajes
+        function showMessage(message, type) {
+            resultMessage.innerHTML = message;
+            resultMessage.className = `result-message ${type}`;
+            resultMessage.style.display = 'block';
+            
+            // Scroll hacia el mensaje
+            resultMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Ocultar mensaje después de 10 segundos si es de éxito
+            if (type === 'success') {
+                setTimeout(() => {
+                    resultMessage.style.display = 'none';
+                }, 10000);
+            }
+        }
+
+        // Manejar envío del formulario
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitForm();
+        });
+
+        // Prevenir envío accidental con Enter
+        form.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
+        // Inicialización
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
