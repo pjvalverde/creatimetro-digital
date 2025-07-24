@@ -632,6 +632,97 @@ body {
     to { transform: translateX(0); opacity: 1; }
 }
 
+/* Evaluación con IA */
+.ai-evaluated {
+    background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+    color: white;
+    border-radius: 8px;
+}
+
+.reevaluate-btn {
+    background: linear-gradient(135deg, #9c27b0 0%, #e1bee7 100%);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-right: 10px;
+}
+
+.reevaluate-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7b1fa2 0%, #ce93d8 100%);
+}
+
+.reevaluate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Ideas evaluadas */
+.ideas-detailed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.idea-evaluated {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.idea-text {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.idea-metrics {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.originality-badge,
+.category-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.originality-badge {
+    color: white;
+}
+
+.originality-alta {
+    background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+}
+
+.originality-media {
+    background: linear-gradient(135deg, #ff9800 0%, #ffcc02 100%);
+}
+
+.originality-baja {
+    background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+}
+
+.category-badge {
+    background: linear-gradient(135deg, #2196f3 0%, #64b5f6 100%);
+    color: white;
+}
+
+.categories-summary {
+    margin-top: 15px;
+    padding: 10px;
+    background: #e3f2fd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    border-left: 4px solid #2196f3;
+}
+
 /* Sin respuestas */
 .no-responses {
     text-align: center;

@@ -144,6 +144,9 @@
                         <div class="response-header">
                             <h3>👤 ${response.nombre}</h3>
                             <div class="response-actions">
+                                <button class="reevaluate-btn" onclick="reevaluateWithAI('${response.id}')" ${response.evaluadoConIA ? 'disabled' : ''}>
+                                    🤖 ${response.evaluadoConIA ? 'Evaluado con IA' : 'Evaluar con IA'}
+                                </button>
                                 <button class="delete-btn" onclick="deleteResponse('${response.id}')">🗑️</button>
                             </div>
                         </div>
@@ -173,6 +176,12 @@
                                 <div class="metric-value">${response.metricas.puntajeCreatividad}/100</div>
                                 <div class="metric-label">🎯 Creatividad</div>
                             </div>
+                            ${response.metricas.originalidadPromedio ? `
+                                <div class="metric">
+                                    <div class="metric-value">${response.metricas.originalidadPromedio}/3</div>
+                                    <div class="metric-label">🌟 Originalidad</div>
+                                </div>
+                            ` : ''}
                             <div class="metric">
                                 <div class="metric-value">${response.diversion}/5</div>
                                 <div class="metric-label">😊 Diversión</div>
@@ -181,17 +190,52 @@
                                 <div class="metric-value">${response.desafio}/5</div>
                                 <div class="metric-label">🧩 Desafío</div>
                             </div>
+                            ${response.evaluadoConIA ? `
+                                <div class="metric ai-evaluated">
+                                    <div class="metric-value">🤖</div>
+                                    <div class="metric-label">Evaluado con IA</div>
+                                </div>
+                            ` : ''}
                         </div>
 
                         <div class="ideas-section">
                             <h4>💡 Ideas generadas (${ideasCount}/10):</h4>
-                            <div class="ideas-list">
-                                ${response.ideas.map((idea, index) => 
-                                    idea && idea.trim() ? 
-                                    `<div class="idea-item"><strong>${index + 1}.</strong> ${idea}</div>` : 
-                                    `<div class="idea-item empty"><strong>${index + 1}.</strong> <em>Sin respuesta</em></div>`
-                                ).join('')}
-                            </div>
+                            ${response.metricas.evaluacionDetallada ? `
+                                <div class="ideas-detailed">
+                                    ${response.metricas.evaluacionDetallada.map((evaluacion, index) => `
+                                        <div class="idea-evaluated">
+                                            <div class="idea-text">
+                                                <strong>${index + 1}.</strong> ${evaluacion.idea}
+                                            </div>
+                                            <div class="idea-metrics">
+                                                <span class="originality-badge originality-${evaluacion.originalidad.toLowerCase()}">
+                                                    ${evaluacion.originalidad}
+                                                </span>
+                                                <span class="category-badge">
+                                                    ${evaluacion.categoria}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                    ${response.ideas.slice(response.metricas.evaluacionDetallada.length).map((idea, index) => 
+                                        idea && idea.trim() ? '' : 
+                                        `<div class="idea-item empty"><strong>${response.metricas.evaluacionDetallada.length + index + 1}.</strong> <em>Sin respuesta</em></div>`
+                                    ).join('')}
+                                </div>
+                                ${response.metricas.categorias ? `
+                                    <div class="categories-summary">
+                                        <strong>🏷️ Categorías identificadas:</strong> ${response.metricas.categorias.join(', ')}
+                                    </div>
+                                ` : ''}
+                            ` : `
+                                <div class="ideas-list">
+                                    ${response.ideas.map((idea, index) => 
+                                        idea && idea.trim() ? 
+                                        `<div class="idea-item"><strong>${index + 1}.</strong> ${idea}</div>` : 
+                                        `<div class="idea-item empty"><strong>${index + 1}.</strong> <em>Sin respuesta</em></div>`
+                                    ).join('')}
+                                </div>
+                            `}
                         </div>
 
                         <div class="feedback-section">
@@ -224,6 +268,40 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Función para re-evaluar con IA
+        async function reevaluateWithAI(id) {
+            if (!confirm('¿Estás seguro de que quieres re-evaluar esta respuesta con IA?')) {
+                return;
+            }
+
+            const button = document.querySelector(`[onclick="reevaluateWithAI('${id}')"]`);
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = '🔄 Evaluando...';
+
+            try {
+                const response = await fetch(`/api/responses/${id}/reevaluate`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAdminMessage('✅ Respuesta re-evaluada con IA exitosamente', 'success');
+                    loadData(); // Recargar datos
+                } else {
+                    showAdminMessage(`❌ Error: ${result.message}`, 'error');
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Error re-evaluando con IA:', error);
+                showAdminMessage('❌ Error de conexión', 'error');
+                button.disabled = false;
+                button.textContent = originalText;
+            }
         }
 
         // Función para eliminar respuesta

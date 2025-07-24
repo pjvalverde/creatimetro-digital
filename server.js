@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,7 +37,103 @@ function writeResponses(responses) {
     }
 }
 
-// Función para calcular métricas de creatividad
+// Función para calcular métricas de creatividad con DeepSeek API
+async function evaluateIdeasWithAI(ideas) {
+    const evaluatedIdeas = [];
+    const validIdeas = ideas.filter(idea => idea && idea.trim().length > 0);
+    
+    for (const idea of validIdeas) {
+        try {
+            const evaluation = await evaluateIdeaWithDeepSeek(idea);
+            evaluatedIdeas.push({
+                idea: idea,
+                originalidad: evaluation.originalidad,
+                categoria: evaluation.categoria,
+                originalidadPuntos: getOriginalidadPoints(evaluation.originalidad)
+            });
+        } catch (error) {
+            console.error('Error evaluando idea:', idea, error);
+            // Fallback a evaluación manual si falla la API
+            evaluatedIdeas.push({
+                idea: idea,
+                originalidad: 'Media',
+                categoria: 'Otra',
+                originalidadPuntos: 2
+            });
+        }
+    }
+
+    // Calcular métricas finales
+    const fluidez = validIdeas.length;
+    const categorias = new Set(evaluatedIdeas.map(e => e.categoria));
+    const flexibilidad = categorias.size;
+    const originalidadPromedio = evaluatedIdeas.reduce((sum, e) => sum + e.originalidadPuntos, 0) / evaluatedIdeas.length || 0;
+    const puntajeCreatividad = Math.min(100, (fluidez * 5) + (flexibilidad * 5) + (originalidadPromedio * 20));
+
+    return {
+        fluidez,
+        flexibilidad,
+        originalidadPromedio: Math.round(originalidadPromedio * 10) / 10,
+        puntajeCreatividad: Math.round(puntajeCreatividad),
+        evaluacionDetallada: evaluatedIdeas,
+        categorias: Array.from(categorias)
+    };
+}
+
+// Función para evaluar una idea individual con DeepSeek
+async function evaluateIdeaWithDeepSeek(idea) {
+    const prompt = `Evalúa la siguiente idea tecnológica para el año 2075 en cuanto a originalidad (Alta, Media, Baja) y clasifícala en una categoría tecnológica (Transporte, Salud, Robótica, Comunicación, Energía, Educación, Medioambiente, Entretenimiento, Hogar, Otra).
+
+Idea: "${idea}"
+
+Responde ÚNICAMENTE en este formato exacto:
+Originalidad: [Alta/Media/Baja]
+Categoría: [Una de las categorías listadas]`;
+
+    const response = await axios.post(
+        process.env.DEEPSEEK_API_URL || 'https://api.deepseek.com/v1/chat/completions',
+        {
+            model: 'deepseek-chat',
+            messages: [
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ],
+            max_tokens: 100,
+            temperature: 0.1
+        },
+        {
+            headers: {
+                'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+
+    const aiResponse = response.data.choices[0].message.content.trim();
+    
+    // Parsear la respuesta de la AI
+    const originalidadMatch = aiResponse.match(/Originalidad:\s*(Alta|Media|Baja)/i);
+    const categoriaMatch = aiResponse.match(/Categoría:\s*(Transporte|Salud|Robótica|Comunicación|Energía|Educación|Medioambiente|Entretenimiento|Hogar|Otra)/i);
+    
+    return {
+        originalidad: originalidadMatch ? originalidadMatch[1] : 'Media',
+        categoria: categoriaMatch ? categoriaMatch[1] : 'Otra'
+    };
+}
+
+// Función auxiliar para convertir originalidad a puntos
+function getOriginalidadPoints(originalidad) {
+    switch (originalidad.toLowerCase()) {
+        case 'alta': return 3;
+        case 'media': return 2;
+        case 'baja': return 1;
+        default: return 2;
+    }
+}
+
+// Función para calcular métricas de creatividad (versión fallback)
 function calculateCreativityMetrics(ideas) {
     // Fluidez: número de ideas completadas (no vacías)
     const fluidez = ideas.filter(idea => idea && idea.trim().length > 0).length;
@@ -80,7 +178,7 @@ function calculateCreativityMetrics(ideas) {
 }
 
 // Endpoint POST /api/submit para recibir respuestas de formulario
-app.post('/api/submit', (req, res) => {
+app.post('/api/submit', async (req, res) => {
     try {
         const {
             nombre,
@@ -101,8 +199,17 @@ app.post('/api/submit', (req, res) => {
             });
         }
 
-        // Calcular métricas de creatividad
-        const metricas = calculateCreativityMetrics(ideas);
+        // Calcular métricas de creatividad con IA (si la API está disponible)
+        let metricas;
+        const useAI = process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_API_KEY !== 'your_deepseek_api_key_here';
+        
+        if (useAI) {
+            console.log('🤖 Evaluando ideas con DeepSeek AI...');
+            metricas = await evaluateIdeasWithAI(ideas);
+        } else {
+            console.log('📊 Usando evaluación manual (fallback)...');
+            metricas = calculateCreativityMetrics(ideas);
+        }
 
         // Crear nueva respuesta
         const nuevaRespuesta = {
@@ -117,7 +224,8 @@ app.post('/api/submit', (req, res) => {
             comentarios,
             tiempoUtilizado: parseInt(tiempoUtilizado),
             metricas,
-            calificacionManual: null
+            calificacionManual: null,
+            evaluadoConIA: useAI
         };
 
         // Leer respuestas existentes y agregar la nueva
@@ -125,10 +233,13 @@ app.post('/api/submit', (req, res) => {
         respuestas.push(nuevaRespuesta);
         writeResponses(respuestas);
 
+        console.log(`✅ Nueva respuesta guardada de ${nombre} (${respuestas.length} total)`);
+
         res.json({
             success: true,
             message: 'Respuesta guardada exitosamente',
-            metricas
+            metricas,
+            evaluadoConIA: useAI
         });
 
     } catch (error) {
@@ -265,6 +376,58 @@ app.put('/api/responses/:id/grade', (req, res) => {
 
     } catch (error) {
         console.error('Error al asignar calificación:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
+    }
+});
+
+// Endpoint POST /api/responses/:id/reevaluate para re-evaluar con IA
+app.post('/api/responses/:id/reevaluate', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const respuestas = readResponses();
+        const respuestaIndex = respuestas.findIndex(r => r.id === id);
+        
+        if (respuestaIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: 'Respuesta no encontrada'
+            });
+        }
+
+        const respuesta = respuestas[respuestaIndex];
+        
+        // Verificar que la API de DeepSeek esté configurada
+        const useAI = process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_API_KEY !== 'your_deepseek_api_key_here';
+        
+        if (!useAI) {
+            return res.status(400).json({
+                success: false,
+                message: 'API de DeepSeek no configurada'
+            });
+        }
+
+        // Re-evaluar con IA
+        const nuevasMetricas = await evaluateIdeasWithAI(respuesta.ideas);
+        
+        // Actualizar respuesta
+        respuestas[respuestaIndex].metricas = nuevasMetricas;
+        respuestas[respuestaIndex].evaluadoConIA = true;
+        respuestas[respuestaIndex].reevaluadoEn = new Date().toISOString();
+        
+        writeResponses(respuestas);
+
+        res.json({
+            success: true,
+            message: 'Respuesta re-evaluada con IA exitosamente',
+            metricas: nuevasMetricas
+        });
+
+    } catch (error) {
+        console.error('Error al re-evaluar respuesta:', error);
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor'
